@@ -77,7 +77,7 @@ local Omarchy theme files.
   (`xdg-utils`), `pgrep` (`procps-ng`), coreutils, `sed`, and `grep`.
 - `omarchy-notification-send` for notifications, with `notify-send` as a
   fallback.
-- Everything runs as your user. There is no root, sudo, network access, or
+- Everything runs as your user, with no root access, network access, or
   remote build step.
 - No second Quickshell process is started; the service runs inside
   `omarchy-shell`.
