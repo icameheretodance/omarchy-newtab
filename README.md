@@ -37,7 +37,7 @@ switch to a supported default browser.
 ### Manual install
 
 The extension lives at
-`~/.config/omarchy/plugins/dance.newtab/extension`. For Chromium, Helium, or
+`~/.config/omarchy/plugins/dance.newtab/extension/browser`. For Chromium, Helium, or
 Brave, append it to the existing `--load-extension` value in the matching file:
 
 - `~/.config/chromium-flags.conf`
@@ -45,7 +45,7 @@ Brave, append it to the existing `--load-extension` value in the matching file:
 - `~/.config/brave-flags.conf`
 
 ```ini
---load-extension=/usr/share/omarchy-webapp-theme/extension,/home/you/.config/omarchy/plugins/dance.newtab/extension
+--load-extension=/usr/share/omarchy-webapp-theme/extension,/home/you/.config/omarchy/plugins/dance.newtab/extension/browser
 ```
 
 Commas separate extension paths. Quit the browser completely before restarting
@@ -58,9 +58,9 @@ it, otherwise the old process keeps the old flags.
 | `~/.config/chromium-flags.conf` | Adds/removes only this extension's path |
 | `~/.config/helium-browser-flags.conf` | Adds/removes only this extension's path |
 | `~/.config/brave-flags.conf` | Adds/removes only this extension's path |
-| `.../extension/colors.css` | Generated palette (untracked) |
-| `.../extension/background-*` | Wallpaper copy (untracked) |
-| `.../extension/.theme-fingerprint` | Sync bookkeeping (untracked) |
+| `.../extension/browser/colors.css` | Generated palette (untracked) |
+| `.../extension/browser/background-*` | Wallpaper copy (untracked) |
+| `.../extension/browser/.theme-fingerprint` | Sync bookkeeping (untracked) |
 
 Each flags-file edit creates a timestamped backup next to it
 (`<file>.bak.<timestamp>`) and never touches other flags. If the browser is

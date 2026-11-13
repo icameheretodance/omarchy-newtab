@@ -4,7 +4,7 @@
 set -u
 
 PLUGIN_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-EXTENSION_DIR="$PLUGIN_DIR/extension"
+EXTENSION_DIR="$PLUGIN_DIR/extension/browser"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 OMARCHY_CURRENT="${OMARCHY_CURRENT_DIR:-$HOME/.local/state/omarchy/current}"
