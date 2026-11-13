@@ -1,0 +1,38 @@
+#!/bin/bash
+# Removes this extension from every supported browser's startup flags while
+# preserving all other --load-extension paths and browser flags.
+# Run this before removing the plugin so the installed path is known.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=common.sh
+source "$SCRIPT_DIR/common.sh"
+
+changed=()
+for conf in helium-browser-flags.conf chromium-flags.conf brave-flags.conf; do
+  flags_file="$CONFIG_HOME/$conf"
+  [[ -f $flags_file ]] || continue
+  if remove_extension_from_flags "$flags_file" "$EXTENSION_DIR"; then
+    case "$conf" in
+    helium-*) changed+=("Helium:helium-browser") ;;
+    chromium-*) changed+=("Chromium:chromium") ;;
+    brave-*) changed+=("Brave:brave") ;;
+    esac
+  fi
+done
+
+running=0
+for entry in "${changed[@]:-}"; do
+  [[ -n $entry ]] || continue
+  if pgrep -x -- "${entry#*:}" >/dev/null 2>&1; then
+    running=1
+  fi
+done
+
+if ((running)); then
+  notify "New Tab removed" "Restart your browser to finish removing the new tab page."
+fi
+
+rm -f -- "$PLUGIN_STATE_DIR"/notified-* 2>/dev/null || true
+exit 0

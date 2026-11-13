@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "dance.newtab",
+  "name": "Omarchy New Tab",
+  "version": "1.0.0",
+  "author": "dance",
+  "license": "MIT",
+  "description": "A minimal, theme-aware new tab page for your default Chromium-based browser, kept in sync with your Omarchy theme.",
+  "kinds": ["service"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Service.qml"
+  }
+}

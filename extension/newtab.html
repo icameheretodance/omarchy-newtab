@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>New Tab</title>
+    <link rel="stylesheet" href="newtab.css" />
+    <link rel="stylesheet" href="colors.css" />
+  </head>
+  <body>
+    <div class="backdrop" aria-hidden="true"></div>
+
+    <main>
+      <header class="top">
+        <span class="brand"><span class="dot"></span>omarchy</span>
+      </header>
+
+      <section class="hero">
+        <p class="greeting" id="greeting"></p>
+        <h1 class="clock" id="clock">--:--</h1>
+        <p class="date" id="date"></p>
+
+        <form class="search" id="search-form" role="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.5-3.5"></path>
+          </svg>
+          <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Search the web or type a URL" aria-label="Search" autofocus />
+          <kbd>/</kbd>
+        </form>
+      </section>
+
+      <footer class="foot">
+        <span>Type <kbd>/</kbd> to search</span>
+        <span class="theme" id="theme"></span>
+      </footer>
+    </main>
+
+    <script src="newtab.js"></script>
+  </body>
+</html>

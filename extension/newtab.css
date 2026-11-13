@@ -1,0 +1,262 @@
+/* Fallback palette until sync-theme writes colors.css. */
+:root {
+  color-scheme: dark;
+  --bg: #101418;
+  --bg-darker: #070a0d;
+  --bg-light: #1a222a;
+  --fg: #c8d1d9;
+  --fg-bright: #f0f6fc;
+  --fg-muted: #7d8590;
+  --accent: #58a6ff;
+  --selection: #1f2a36;
+  --wallpaper: none;
+  --theme-name: "Omarchy";
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: "JetBrainsMono Nerd Font", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+.backdrop {
+  position: fixed;
+  inset: -24px;
+  z-index: -2;
+  background-image: var(--wallpaper, none);
+  background-position: center;
+  background-size: cover;
+  filter: blur(1px) saturate(0.92);
+  transform: scale(1.02);
+}
+
+.backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  opacity: 0.9;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      1100px 560px at 50% 16%,
+      color-mix(in srgb, var(--accent) 8%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      transparent 55%,
+      color-mix(in srgb, var(--bg-darker) 60%, transparent)
+    );
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  width: min(1120px, 92vw);
+  height: 100%;
+  margin: 0 auto;
+  padding: clamp(20px, 4vh, 38px) 0;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.brand .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 14px var(--accent);
+}
+
+.hero {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4vh 0 2vh;
+  text-align: center;
+}
+
+.greeting {
+  margin: 0 0 1.1rem;
+  font-size: clamp(0.72rem, 1.4vw, 0.86rem);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.clock {
+  margin: 0;
+  font-size: clamp(4.2rem, 13vw, 8.5rem);
+  font-weight: 200;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+  color: var(--fg-bright);
+  text-shadow: 0 20px 70px color-mix(in srgb, var(--bg-darker) 70%, transparent);
+}
+
+.date {
+  margin: 0.9rem 0 0;
+  font-size: clamp(0.82rem, 1.5vw, 0.98rem);
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+}
+
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: min(620px, 88vw);
+  margin-top: clamp(2rem, 5vh, 3.4rem);
+}
+
+.search svg {
+  position: absolute;
+  left: 19px;
+  width: 18px;
+  height: 18px;
+  color: var(--fg-muted);
+  pointer-events: none;
+}
+
+.search input {
+  width: 100%;
+  padding: 17px 58px 17px 50px;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--fg-bright);
+  background: color-mix(in srgb, var(--bg-light) 52%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+  border-radius: 14px;
+  outline: none;
+  backdrop-filter: blur(18px) saturate(1.2);
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.search input::placeholder {
+  color: var(--fg-muted);
+}
+
+.search input:focus {
+  background: color-mix(in srgb, var(--bg-light) 70%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 24px 60px -28px var(--bg-darker);
+}
+
+kbd {
+  font: inherit;
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 4px 8px;
+  color: var(--fg-muted);
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  border-radius: 6px;
+}
+
+.search kbd {
+  position: absolute;
+  right: 16px;
+  transition: opacity 0.15s ease;
+}
+
+.search:focus-within kbd {
+  opacity: 0;
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 2vh;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+  opacity: 0.85;
+}
+
+.theme {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.top,
+.hero,
+.foot {
+  animation: rise 0.5s ease both;
+}
+
+.hero {
+  animation-delay: 0.04s;
+}
+
+.foot {
+  animation-delay: 0.16s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top,
+  .hero,
+  .foot {
+    animation: none;
+  }
+
+  .search input,
+  .search kbd {
+    transition: none;
+  }
+}

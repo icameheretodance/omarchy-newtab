@@ -1,0 +1,60 @@
+#!/bin/bash
+# Adds the extension to the default Chromium-based browser's startup flags.
+# Runs on every shell start; all operations are idempotent.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=common.sh
+source "$SCRIPT_DIR/common.sh"
+
+desktop="$(detect_default_desktop)"
+set_browser_info "$desktop"
+
+if [[ ! -f $EXTENSION_DIR/manifest.json || ! -f $EXTENSION_DIR/newtab.html ]]; then
+  notify "New Tab is missing its page files" "Reinstall the Omarchy New Tab plugin."
+  exit 0
+fi
+
+case "$EXTENSION_DIR" in
+*[,]* | *[[:space:]]*)
+  notify "New Tab cannot use this install path" "The plugin path contains a comma or space: $EXTENSION_DIR"
+  exit 0
+  ;;
+esac
+
+if [[ $BROWSER_SUPPORT != "supported" ]]; then
+  case "$BROWSER_SUPPORT" in
+  incompatible)
+    notify_once "${BROWSER_DESKTOP:-none}" \
+      "New Tab needs a Chromium-based browser" \
+      "$BROWSER_NAME is your default browser. Set Chromium, Helium, or Brave as the default, then re-enable this plugin."
+    ;;
+  unsupported)
+    notify_once "${BROWSER_DESKTOP:-none}" \
+      "New Tab does not support $BROWSER_NAME automatically" \
+      "Google Chrome, Edge, and Vivaldi no longer allow this extension install method. Set Chromium, Helium, or Brave as the default browser."
+    ;;
+  *)
+    notify_once "${BROWSER_DESKTOP:-none}" \
+      "No supported default browser found" \
+      "Set Chromium, Helium, or Brave as the default browser, then re-enable this plugin."
+    ;;
+  esac
+  exit 0
+fi
+
+flags_file="$CONFIG_HOME/$BROWSER_CONF"
+
+if ! extension_in_flags "$flags_file" "$EXTENSION_DIR"; then
+  if add_extension_to_flags "$flags_file" "$EXTENSION_DIR"; then
+    if browser_running; then
+      notify "New Tab is ready" "Restart $BROWSER_NAME to see it on new tabs."
+    else
+      notify "New Tab is ready" "Open a new tab in $BROWSER_NAME."
+    fi
+  fi
+fi
+
+"$SCRIPT_DIR/sync-theme"
+exit 0

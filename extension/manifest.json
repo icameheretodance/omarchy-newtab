@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Omarchy New Tab",
+  "version": "1.0.0",
+  "description": "A minimal, theme-aware new tab page synced with the active Omarchy theme.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "permissions": ["search"]
+}
