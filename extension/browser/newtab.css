@@ -11,6 +11,11 @@
   --selection: #1f2a36;
   --wallpaper: none;
   --theme-name: "Omarchy";
+  --motion-fast: 0.15s;
+  --motion-base: 0.18s;
+  --motion-rise: 0.5s;
+  --motion-rise-delay-hero: 0.04s;
+  --motion-rise-delay-foot: 0.16s;
 }
 
 *,
@@ -169,9 +174,9 @@ main {
   outline: none;
   backdrop-filter: blur(18px) saturate(1.2);
   transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease;
+    background var(--motion-base) ease,
+    border-color var(--motion-base) ease,
+    box-shadow var(--motion-base) ease;
 }
 
 .search input::placeholder {
@@ -200,7 +205,7 @@ kbd {
 .search kbd {
   position: absolute;
   right: 16px;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--motion-fast) ease;
 }
 
 .search:focus-within kbd {
@@ -237,15 +242,15 @@ kbd {
 .top,
 .hero,
 .foot {
-  animation: rise 0.5s ease both;
+  animation: rise var(--motion-rise) ease both;
 }
 
 .hero {
-  animation-delay: 0.04s;
+  animation-delay: var(--motion-rise-delay-hero);
 }
 
 .foot {
-  animation-delay: 0.16s;
+  animation-delay: var(--motion-rise-delay-foot);
 }
 
 @media (prefers-reduced-motion: reduce) {
