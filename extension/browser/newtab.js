@@ -5,6 +5,7 @@ const date = $("#date");
 const greeting = $("#greeting");
 const theme = $("#theme");
 const form = $("#search-form");
+theme.textContent = "Omarchy";
 const input = $("#q");
 
 function moment() {
@@ -35,11 +36,7 @@ function tick() {
   setTimeout(tick, Math.max(250, next));
 }
 
-function showThemeName() {
-  const name = getComputedStyle(document.documentElement)
-    .getPropertyValue("--theme-name")
-    .trim()
-    .replace(/^["']|["']$/g, "");
+function showThemeName(name) {
   if (name) theme.textContent = name;
 }
 
@@ -81,27 +78,66 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+const themeVariables = [
+  "--bg",
+  "--bg-darker",
+  "--bg-light",
+  "--fg",
+  "--fg-bright",
+  "--fg-muted",
+  "--accent",
+  "--selection",
+  "--wallpaper",
+];
+const hexColor = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+const wallpaper = /^url\(\s*["']?background-[a-z0-9-]+-[0-9a-f]{10}\.(?:png|jpe?g|webp|gif|avif)["']?\s*\)$/i;
+
+function applyTheme(css) {
+  let sheet;
+  try {
+    sheet = new CSSStyleSheet();
+    sheet.replaceSync(css);
+  } catch (error) {
+    return;
+  }
+
+  const root = document.documentElement;
+  for (const rule of sheet.cssRules) {
+    if (rule.selectorText !== ":root") continue;
+    for (const name of themeVariables) {
+      const value = rule.style.getPropertyValue(name).trim();
+      if (!value) continue;
+      if (name === "--wallpaper") {
+        if (value === "none" || wallpaper.test(value)) {
+          root.style.setProperty(name, value);
+        }
+      } else if (hexColor.test(value)) {
+        root.style.setProperty(name, value);
+      }
+    }
+  }
+}
+
 async function refreshTheme() {
   if (document.visibilityState === "hidden") return;
   try {
-    const response = await fetch("colors.css", { cache: "no-store" });
-    if (!response.ok) return;
-    const css = await response.text();
-    let style = document.getElementById("live-theme");
-    if (!style) {
-      style = document.createElement("style");
-      style.id = "live-theme";
-      document.head.appendChild(style);
+    const [cssResponse, nameResponse] = await Promise.all([
+      fetch("colors.css", { cache: "no-store" }),
+      fetch("theme-name.txt", { cache: "no-store" }),
+    ]);
+    if (cssResponse.ok) applyTheme(await cssResponse.text());
+    if (nameResponse.ok) {
+      const name = (await nameResponse.text())
+        .replace(/[\u0000-\u001f\u007f]/g, "")
+        .trim();
+      showThemeName(name);
     }
-    if (style.textContent !== css) style.textContent = css;
-    showThemeName();
   } catch (error) {
-    // The generated theme file is missing; the fallback palette stays.
+    // The generated theme files are missing; the fallback palette stays.
   }
 }
 
 tick();
-showThemeName();
 refreshTheme();
 setInterval(refreshTheme, 30000);
 document.addEventListener("visibilitychange", refreshTheme);

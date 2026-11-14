@@ -27,7 +27,8 @@ When the shell loads the service, it:
 2. Adds this plugin's extension folder to that browser's startup flags,
    preserving every other flag and `--load-extension` path.
 3. Sends a desktop notification asking you to restart the browser.
-4. Generates `colors.css` and a wallpaper copy from the active theme.
+4. Generates `colors.css`, `theme-name.txt`, and a wallpaper copy from the
+   active theme.
 
 Restart the browser once so it picks up the extension. If the default browser
 is not supported, nothing is changed and a one-time notification explains why.
@@ -59,6 +60,7 @@ it, otherwise the old process keeps the old flags.
 | `~/.config/helium-browser-flags.conf` | Adds/removes only this extension's path |
 | `~/.config/brave-flags.conf` | Adds/removes only this extension's path |
 | `.../extension/browser/colors.css` | Generated palette (untracked) |
+| `.../extension/browser/theme-name.txt` | Generated theme label (untracked) |
 | `.../extension/browser/background-*` | Wallpaper copy (untracked) |
 | `.../extension/browser/.theme-fingerprint` | Sync bookkeeping (untracked) |
 
@@ -69,7 +71,10 @@ running, it must be restarted for the change to apply.
 The extension requests only the `search` permission. It has no host
 permissions, makes no analytics or network requests of its own, and sends
 searches through the browser's own search provider. The service only reads
-local Omarchy theme files.
+local Omarchy theme files. Palette values are validated as hex colors before
+they reach the extension, the page applies generated CSS through a fixed
+property allowlist, and wallpaper copies are limited to recognized image
+formats and 50 MiB.
 
 ### Dependencies and privileges
 
@@ -91,9 +96,10 @@ local Omarchy theme files.
 - `scripts/sync-theme` renders the palette and copies the wallpaper into the
   extension. A fingerprint guard makes repeat runs cheap. The wallpaper file
   name is content-addressed.
-- The page re-fetches `colors.css` every 30 seconds while it is visible, so an
-  already-open new tab picks up theme changes. Theme-set changes arrive through
-  the file watcher; a 60-second check also catches wallpaper-only changes.
+- The page re-fetches `colors.css` and `theme-name.txt` every 30 seconds while
+  it is visible, so an already-open new tab picks up theme changes. Theme-set
+  changes arrive through the file watcher; a 60-second check also catches
+  wallpaper-only changes.
 - Only the default browser is configured automatically. If you change the
   default while the shell is running, disable and re-enable the plugin, or run
   `~/.config/omarchy/plugins/dance.newtab/scripts/install` yourself.
