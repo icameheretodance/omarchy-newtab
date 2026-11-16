@@ -72,9 +72,9 @@ The extension requests only the `search` permission. It has no host
 permissions, makes no analytics or network requests of its own, and sends
 searches through the browser's own search provider. The service only reads
 local Omarchy theme files. Palette values are validated as hex colors before
-they reach the extension, the page applies generated CSS through a fixed
-property allowlist, and wallpaper copies are limited to recognized image
-formats and 50 MiB.
+they reach the extension, generated CSS is fetched and filtered through a
+fixed property allowlist instead of being linked as a stylesheet, and wallpaper
+copies are limited to recognized image formats and 50 MiB.
 
 ### Dependencies and privileges
 
@@ -134,7 +134,7 @@ from the flags files listed above.
 - **Theme did not update:** run
   `~/.config/omarchy/plugins/dance.newtab/scripts/sync-theme`, then reload the
   new tab. Themes with unreadable or missing `colors.toml` fall back to the
-  bundled palette.
+  bundled palette, and stale generated theme assets are removed.
 - **Plugin refuses the install path:** the extension path must not contain
   spaces or commas because they are flag and list separators. Move the plugin
   directory to a path without them.

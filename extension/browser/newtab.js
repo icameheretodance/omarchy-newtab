@@ -118,23 +118,23 @@ function applyTheme(css) {
   }
 }
 
+async function fetchText(path) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    return response.ok ? await response.text() : "";
+  } catch (error) {
+    return "";
+  }
+}
+
 async function refreshTheme() {
   if (document.visibilityState === "hidden") return;
-  try {
-    const [cssResponse, nameResponse] = await Promise.all([
-      fetch("colors.css", { cache: "no-store" }),
-      fetch("theme-name.txt", { cache: "no-store" }),
-    ]);
-    if (cssResponse.ok) applyTheme(await cssResponse.text());
-    if (nameResponse.ok) {
-      const name = (await nameResponse.text())
-        .replace(/[\u0000-\u001f\u007f]/g, "")
-        .trim();
-      showThemeName(name);
-    }
-  } catch (error) {
-    // The generated theme files are missing; the fallback palette stays.
-  }
+  const css = await fetchText("colors.css");
+  if (css) applyTheme(css);
+  const name = (await fetchText("theme-name.txt"))
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .trim();
+  showThemeName(name);
 }
 
 tick();
