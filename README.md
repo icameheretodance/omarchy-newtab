@@ -5,8 +5,6 @@ an Omarchy shell service plugin. It shows a clock, greeting, date, search field,
 optional quick links, and a background picker over your active Omarchy palette.
 It can use the current theme's wallpapers or images you add yourself.
 
-![preview](preview.png)
-
 ![Theme slideshow](showcase.gif)
 
 ## Requirements
