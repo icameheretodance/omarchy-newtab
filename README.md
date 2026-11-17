@@ -115,8 +115,8 @@ are rejected.
 
 Use the button in the top-right corner to open the **Display**, **Links**, and
 **Background** tabs. Display controls the clock, date, greeting, theme name,
-12/24-hour time, seconds, compact layout, and reduced motion. Links manages
-quick links. Background provides the wallpaper picker, dim, and blur controls.
+12/24-hour time, seconds, and reduced motion. Links manages quick links.
+Background provides the wallpaper picker, dim, and blur controls.
 Changes apply immediately and can be restored with **Reset to defaults**.
 
 ### Quick links

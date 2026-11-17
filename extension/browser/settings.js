@@ -12,7 +12,6 @@
     showTheme: true,
     clock24: true,
     showSeconds: false,
-    compact: false,
     reduceMotion: false,
     wallpaperDim: 90,
     wallpaperBlur: 1,
@@ -27,7 +26,6 @@
     "showTheme",
     "clock24",
     "showSeconds",
-    "compact",
     "reduceMotion",
     "showLinks",
   ];
@@ -163,7 +161,6 @@
       root.classList.toggle(className, !settings[key]);
     }
 
-    root.classList.toggle("compact", settings.compact);
     root.classList.toggle("reduce-motion", settings.reduceMotion);
     root.style.setProperty("--wallpaper-dim", String(settings.wallpaperDim / 100));
     root.style.setProperty("--wallpaper-blur", `${settings.wallpaperBlur}px`);

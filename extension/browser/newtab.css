@@ -277,10 +277,6 @@ kbd {
   white-space: nowrap;
 }
 
-.compact .links {
-  margin-top: 0.65rem;
-}
-
 .foot {
   display: flex;
   align-items: center;
@@ -306,26 +302,6 @@ kbd {
 
 .no-clock .date {
   margin-top: 0;
-}
-
-.compact .hero {
-  padding: 2vh 0 1vh;
-}
-
-.compact .clock {
-  font-size: clamp(3.2rem, 9vw, 6.4rem);
-}
-
-.compact .greeting {
-  margin-bottom: 0.75rem;
-}
-
-.compact .search {
-  margin-top: clamp(1.4rem, 3vh, 2.4rem);
-}
-
-.compact .foot {
-  padding-top: 1vh;
 }
 
 .icon-button {
