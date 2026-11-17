@@ -104,6 +104,16 @@ copies are limited to recognized image formats and 50 MiB.
   default while the shell is running, disable and re-enable the plugin, or run
   `~/.config/omarchy/plugins/dance.newtab/scripts/install` yourself.
 
+## Settings
+
+Use the settings button in the top-right corner to show or hide the clock,
+date, greeting, and theme name, switch between 12- and 24-hour time, show
+seconds, enable a compact layout, reduce motion, and adjust wallpaper dim and
+blur. Changes apply immediately and can be restored with **Reset to defaults**.
+
+Preferences are stored in the browser profile with `localStorage`; the
+extension still requests only the `search` permission.
+
 ## Uninstall
 
 Run the uninstall script before removing or disabling the plugin; disabling the

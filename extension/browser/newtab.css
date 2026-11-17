@@ -10,6 +10,9 @@
   --accent: #58a6ff;
   --selection: #1f2a36;
   --wallpaper: none;
+  --wallpaper-dim: 0.9;
+  --wallpaper-blur: 1px;
+  --wallpaper-inset: -24px;
   --motion-fast: 0.15s;
   --motion-base: 0.18s;
   --motion-rise: 0.5s;
@@ -39,13 +42,13 @@ body {
 
 .backdrop {
   position: fixed;
-  inset: -24px;
+  inset: var(--wallpaper-inset, -24px);
   z-index: -2;
   background-image: var(--wallpaper, none);
   background-position: center;
   background-size: cover;
-  filter: blur(1px) saturate(0.92);
-  transform: scale(1.02);
+  filter: blur(var(--wallpaper-blur, 1px)) saturate(0.92);
+  transform: scale(1.04);
 }
 
 .backdrop::after {
@@ -53,7 +56,7 @@ body {
   position: absolute;
   inset: 0;
   background: var(--bg);
-  opacity: 0.9;
+  opacity: var(--wallpaper-dim, 0.9);
 }
 
 body::before {
@@ -227,6 +230,237 @@ kbd {
   text-transform: uppercase;
 }
 
+.no-greeting .greeting,
+.no-clock .clock,
+.no-date .date,
+.no-theme .theme {
+  display: none;
+}
+
+.no-clock .date {
+  margin-top: 0;
+}
+
+.compact .hero {
+  padding: 2vh 0 1vh;
+}
+
+.compact .clock {
+  font-size: clamp(3.2rem, 9vw, 6.4rem);
+}
+
+.compact .greeting {
+  margin-bottom: 0.75rem;
+}
+
+.compact .search {
+  margin-top: clamp(1.4rem, 3vh, 2.4rem);
+}
+
+.compact .foot {
+  padding-top: 1vh;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    color var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
+}
+
+.icon-button:hover,
+.icon-button:focus-visible {
+  color: var(--fg-bright);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+  border-color: color-mix(in srgb, var(--fg) 14%, transparent);
+  outline: none;
+}
+
+.icon-button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.icon-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.settings-dialog {
+  width: min(430px, 92vw);
+  max-height: min(760px, 88vh);
+  padding: 0;
+  color: var(--fg);
+  background: transparent;
+  border: 0;
+  border-radius: 18px;
+  overflow: visible;
+}
+
+.settings-dialog::backdrop {
+  background: rgb(0 0 0 / 0.56);
+  backdrop-filter: blur(6px);
+}
+
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  max-height: min(760px, 88vh);
+  padding: 1.35rem 1.35rem 1.15rem;
+  overflow-y: auto;
+  background: color-mix(in srgb, var(--bg-light) 93%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+  border-radius: 18px;
+  box-shadow:
+    0 30px 90px -35px var(--bg-darker),
+    inset 0 1px 0 color-mix(in srgb, var(--fg) 8%, transparent);
+  backdrop-filter: blur(26px) saturate(1.2);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--fg) 22%, transparent) transparent;
+}
+
+.settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.settings-title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-bright);
+}
+
+.settings-section {
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.settings-section h3 {
+  margin: 0 0 0.15rem;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.2rem;
+  font-size: 0.84rem;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.setting input[type="checkbox"] {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.setting.range {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+  padding: 0.5rem 0;
+}
+
+.range-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.range-head output {
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.setting.range input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.settings-note {
+  margin: 0.9rem 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.button {
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+  font-size: 0.72rem;
+  color: var(--fg-bright);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 9px;
+  cursor: pointer;
+  transition:
+    background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  outline: none;
+}
+
+.button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.button.ghost {
+  color: var(--fg-muted);
+  background: transparent;
+  border-color: color-mix(in srgb, var(--fg) 14%, transparent);
+}
+
+.button.ghost:hover,
+.button.ghost:focus-visible {
+  color: var(--fg-bright);
+  background: color-mix(in srgb, var(--fg) 7%, transparent);
+  border-color: color-mix(in srgb, var(--fg) 24%, transparent);
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -263,4 +497,17 @@ kbd {
   .search kbd {
     transition: none;
   }
+}
+
+.reduce-motion .top,
+.reduce-motion .hero,
+.reduce-motion .foot {
+  animation: none;
+}
+
+.reduce-motion .search input,
+.reduce-motion .search kbd,
+.reduce-motion .icon-button,
+.reduce-motion .button {
+  transition: none;
 }

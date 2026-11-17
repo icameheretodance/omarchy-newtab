@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>New Tab</title>
+    <script src="settings.js"></script>
     <link rel="stylesheet" href="newtab.css" />
   </head>
   <body>
@@ -12,6 +13,14 @@
     <main>
       <header class="top">
         <span class="brand"><span class="dot"></span>omarchy</span>
+        <button class="icon-button" id="settings-button" type="button" aria-label="Open settings" aria-haspopup="dialog" aria-controls="settings-dialog" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h10M18 18h2"></path>
+            <circle cx="16" cy="6" r="2"></circle>
+            <circle cx="10" cy="12" r="2"></circle>
+            <circle cx="16" cy="18" r="2"></circle>
+          </svg>
+        </button>
       </header>
 
       <section class="hero">
@@ -34,6 +43,54 @@
         <span class="theme" id="theme"></span>
       </footer>
     </main>
+
+    <dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
+      <div class="settings-card">
+        <header class="settings-head">
+          <h2 class="settings-title" id="settings-title">Settings</h2>
+          <button class="icon-button" id="settings-close" type="button" aria-label="Close settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12"></path>
+            </svg>
+          </button>
+        </header>
+
+        <section class="settings-section" aria-labelledby="settings-display">
+          <h3 id="settings-display">Display</h3>
+          <label class="setting"><span>Clock</span><input type="checkbox" data-setting="showClock" /></label>
+          <label class="setting"><span>Date</span><input type="checkbox" data-setting="showDate" /></label>
+          <label class="setting"><span>Greeting</span><input type="checkbox" data-setting="showGreeting" /></label>
+          <label class="setting"><span>Theme name</span><input type="checkbox" data-setting="showTheme" /></label>
+          <label class="setting"><span>24-hour clock</span><input type="checkbox" data-setting="clock24" /></label>
+          <label class="setting"><span>Seconds</span><input type="checkbox" data-setting="showSeconds" /></label>
+        </section>
+
+        <section class="settings-section" aria-labelledby="settings-layout">
+          <h3 id="settings-layout">Layout</h3>
+          <label class="setting"><span>Compact layout</span><input type="checkbox" data-setting="compact" /></label>
+          <label class="setting"><span>Reduce motion</span><input type="checkbox" data-setting="reduceMotion" /></label>
+        </section>
+
+        <section class="settings-section" aria-labelledby="settings-wallpaper">
+          <h3 id="settings-wallpaper">Wallpaper</h3>
+          <label class="setting range">
+            <span class="range-head"><span>Dim</span><output data-output="wallpaperDim"></output></span>
+            <input type="range" data-setting="wallpaperDim" min="0" max="100" step="5" />
+          </label>
+          <label class="setting range">
+            <span class="range-head"><span>Blur</span><output data-output="wallpaperBlur"></output></span>
+            <input type="range" data-setting="wallpaperBlur" min="0" max="20" step="1" />
+          </label>
+        </section>
+
+        <p class="settings-note">Preferences are saved in this browser.</p>
+
+        <div class="settings-actions">
+          <button class="button ghost" id="settings-reset" type="button">Reset to defaults</button>
+          <button class="button" id="settings-done" type="button">Done</button>
+        </div>
+      </div>
+    </dialog>
 
     <script src="newtab.js"></script>
   </body>
