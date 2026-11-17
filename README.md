@@ -7,6 +7,8 @@ It can use the current theme's wallpapers or images you add yourself.
 
 ![preview](preview.png)
 
+![Theme slideshow](showcase.gif)
+
 ## Requirements
 
 - Omarchy with the Omarchy shell (Quattro or newer).
