@@ -1,5 +1,10 @@
 (() => {
   const STORAGE_KEY = "omarchy-newtab-settings-v1";
+  const MAX_LINKS = 12;
+  const MAX_LINK_NAME = 40;
+  const MAX_URL_LENGTH = 2048;
+  const BACKGROUND_PATTERN =
+    /^(?:system|none|theme:wallpaper-[0-9a-f]{10}\.(?:png|jpe?g|webp|gif|avif)|custom:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
   const DEFAULTS = Object.freeze({
     showClock: true,
     showDate: true,
@@ -11,6 +16,9 @@
     reduceMotion: false,
     wallpaperDim: 90,
     wallpaperBlur: 1,
+    showLinks: false,
+    links: [],
+    background: "system",
   });
   const BOOLEAN_KEYS = [
     "showClock",
@@ -21,6 +29,7 @@
     "showSeconds",
     "compact",
     "reduceMotion",
+    "showLinks",
   ];
   const RANGES = {
     wallpaperDim: [0, 100],
@@ -33,8 +42,85 @@
     showTheme: "no-theme",
   };
 
+  function stripControl(value) {
+    return typeof value === "string"
+      ? value.replace(/[\u0000-\u001f\u007f]/g, " ")
+      : "";
+  }
+
+  function normalizeLinkName(value) {
+    return stripControl(value)
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, MAX_LINK_NAME);
+  }
+
+  function hostFromUrl(value) {
+    try {
+      return new URL(value).hostname.replace(/^www\./i, "");
+    } catch {
+      return "";
+    }
+  }
+
+  function normalizeUrl(value) {
+    if (typeof value !== "string") return "";
+    let text = value.trim();
+    if (
+      !text ||
+      text.length > MAX_URL_LENGTH ||
+      /[\u0000-\u001f\u007f]/.test(text)
+    ) {
+      return "";
+    }
+    if (!text.includes("://")) text = `https://${text}`;
+
+    try {
+      const url = new URL(text);
+      if (url.protocol !== "http:" && url.protocol !== "https:") return "";
+      if (!url.hostname || url.username || url.password) return "";
+      return url.href.length <= MAX_URL_LENGTH ? url.href : "";
+    } catch {
+      return "";
+    }
+  }
+
+  function normalizeLink(value) {
+    if (!value || typeof value !== "object") return null;
+    const url = normalizeUrl(value.url);
+    if (!url) return null;
+    const name = (
+      normalizeLinkName(value.name) ||
+      hostFromUrl(url) ||
+      url
+    ).slice(0, MAX_LINK_NAME);
+    return { name, url };
+  }
+
+  function normalizeLinks(value) {
+    if (!Array.isArray(value)) return [];
+    const links = [];
+    const seen = new Set();
+    for (const item of value) {
+      const link = normalizeLink(item);
+      if (!link) continue;
+      const key = link.url.replace(/\/+$/, "").toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      links.push(link);
+      if (links.length >= MAX_LINKS) break;
+    }
+    return links;
+  }
+
+  function normalizeBackground(value) {
+    return typeof value === "string" && BACKGROUND_PATTERN.test(value)
+      ? value
+      : DEFAULTS.background;
+  }
+
   function normalize(value) {
-    const settings = { ...DEFAULTS };
+    const settings = { ...DEFAULTS, links: [] };
     if (!value || typeof value !== "object") return settings;
 
     for (const key of BOOLEAN_KEYS) {
@@ -48,6 +134,8 @@
       }
     }
 
+    settings.links = normalizeLinks(value.links);
+    settings.background = normalizeBackground(value.background);
     return settings;
   }
 
@@ -89,7 +177,13 @@
   const api = {
     STORAGE_KEY,
     DEFAULTS,
+    MAX_LINKS,
     normalize,
+    normalizeUrl,
+    normalizeLinkName,
+    normalizeLink,
+    normalizeBackground,
+    hostFromUrl,
     read,
     save,
     apply,

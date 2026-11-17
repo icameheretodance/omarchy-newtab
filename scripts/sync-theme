@@ -1,7 +1,6 @@
 #!/bin/bash
-# Renders the active Omarchy theme into the extension as colors.css, the theme
-# name, and a stable, content-addressed wallpaper. No-op when the fingerprint is
-# unchanged.
+# Renders the active Omarchy theme into the extension: palette, theme name,
+# available wallpapers, and the active wallpaper. No-op when unchanged.
 
 set -euo pipefail
 
@@ -13,11 +12,20 @@ current="$OMARCHY_CURRENT"
 theme_dir="$current/theme"
 colors_toml="$theme_dir/colors.toml"
 theme_name_file="$current/theme.name"
+backgrounds_dir="$theme_dir/backgrounds"
 background_file="$current/background"
 
+MAX_WALLPAPERS=24
+MAX_WALLPAPER_BYTES=52428800
+MAX_TOTAL_WALLPAPER_BYTES=104857600
+
 remove_generated() {
-  rm -f -- "$EXTENSION_DIR/colors.css" "$EXTENSION_DIR/theme-name.txt" "$EXTENSION_DIR/.theme-fingerprint"
-  for old in "$EXTENSION_DIR"/background-*; do
+  rm -f -- \
+    "$EXTENSION_DIR/colors.css" \
+    "$EXTENSION_DIR/theme-name.txt" \
+    "$EXTENSION_DIR/wallpapers.json" \
+    "$EXTENSION_DIR/.theme-fingerprint"
+  for old in "$EXTENSION_DIR"/background-* "$EXTENSION_DIR"/wallpaper-*; do
     [[ -e $old ]] || continue
     rm -f -- "$old"
   done
@@ -31,10 +39,12 @@ fi
 
 tmp_css=""
 tmp_name=""
+tmp_manifest=""
 tmp_image=""
 cleanup() {
   if [[ -n $tmp_css ]]; then rm -f -- "$tmp_css"; fi
   if [[ -n $tmp_name ]]; then rm -f -- "$tmp_name"; fi
+  if [[ -n $tmp_manifest ]]; then rm -f -- "$tmp_manifest"; fi
   if [[ -n $tmp_image ]]; then rm -f -- "$tmp_image"; fi
 }
 trap cleanup EXIT
@@ -47,19 +57,26 @@ theme_name="$(printf '%s' "$theme_name" | tr -d '\000-\037\177')"
 theme_name="${theme_name:0:120}"
 [[ -n $theme_name ]] || theme_name="Omarchy"
 
-slug="$(printf '%s' "$theme_name" | LC_ALL=C tr '[:upper:]' '[:lower:]' | LC_ALL=C sed -e 's/[^a-z0-9]/-/g' -e 's/--*/-/g' -e 's/^-//' -e 's/-$//')"
-[[ -n $slug ]] || slug="theme"
-
 background_source=""
 if [[ -e $background_file ]]; then
   background_source="$(readlink -f -- "$background_file" 2>/dev/null || true)"
   [[ -f $background_source ]] || background_source=""
 fi
 
-fingerprint="${theme_name}|$(stat -c '%Y:%s' -- "$colors_toml" 2>/dev/null || echo 0)|${background_source}|$(stat -c '%Y:%s' -- "${background_source:-/nonexistent}" 2>/dev/null || echo 0)"
+background_fingerprint="none"
+if [[ -d $backgrounds_dir ]]; then
+  background_fingerprint="$(
+    for source in "$backgrounds_dir"/*; do
+      [[ -f $source ]] || continue
+      stat -c '%n:%Y:%s' -- "$source" 2>/dev/null || true
+    done | LC_ALL=C sort | sha256sum | cut -c 1-16
+  )"
+fi
+
+fingerprint="v2|${theme_name}|$(stat -c '%Y:%s' -- "$colors_toml" 2>/dev/null || echo 0)|${background_source}|$(stat -c '%Y:%s' -- "${background_source:-/nonexistent}" 2>/dev/null || echo 0)|${background_fingerprint}"
 fingerprint_file="$EXTENSION_DIR/.theme-fingerprint"
 
-if [[ -f $fingerprint_file && -f $EXTENSION_DIR/colors.css && -f $EXTENSION_DIR/theme-name.txt ]] &&
+if [[ -f $fingerprint_file && -f $EXTENSION_DIR/colors.css && -f $EXTENSION_DIR/theme-name.txt && -f $EXTENSION_DIR/wallpapers.json ]] &&
   [[ "$(<"$fingerprint_file")" == "$fingerprint" ]]; then
   exit 0
 fi
@@ -102,6 +119,10 @@ detect_image_type() {
   esac
 }
 
+json_escape() {
+  printf '%s' "$1" | tr -d '\000-\037\177' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'
+}
+
 bg="$(get_color background '#0B0F14')"
 bg_darker="$(get_color darker_background "$(get_color dark_background '#030507')")"
 bg_light="$(get_color lighter_background "$(get_color dark_background '#121A24')")"
@@ -111,21 +132,66 @@ fg_muted="$(get_color muted "$(get_color dark_foreground '#7d8590')")"
 accent="$(get_color accent "$(get_color green '#5AF78E')")"
 selection="$(get_color selection "$(get_color dark_background '#1B2635')")"
 
-wallpaper="none"
-image_name=""
+wallpaper_sources=()
 if [[ -n $background_source ]]; then
-  image_type="$(detect_image_type "$background_source")"
-  size="$(stat -c '%s' -- "$background_source" 2>/dev/null || printf '0')"
-  if [[ -n $image_type ]] && ((size > 0 && size <= 52428800)); then
-    hash="$(sha256sum -- "$background_source" | cut -c 1-10)"
-    image_name="background-${slug}-${hash}.${image_type}"
-    tmp_image="$(mktemp "$EXTENSION_DIR/.background.XXXXXX")"
-    cp -- "$background_source" "$tmp_image"
+  wallpaper_sources+=("$background_source")
+fi
+if [[ -d $backgrounds_dir ]]; then
+  for source in "$backgrounds_dir"/*; do
+    [[ -f $source ]] || continue
+    [[ $source == "$background_source" ]] && continue
+    wallpaper_sources+=("$source")
+    (( ${#wallpaper_sources[@]} >= MAX_WALLPAPERS )) && break
+  done
+fi
+
+declare -A generated_files=()
+system_wallpaper="none"
+total_bytes=0
+manifest_has_entry=0
+tmp_manifest="$(mktemp "$EXTENSION_DIR/.wallpapers.XXXXXX")"
+printf '[' >"$tmp_manifest"
+
+for source in "${wallpaper_sources[@]}"; do
+  [[ -f $source ]] || continue
+  image_type="$(detect_image_type "$source")"
+  [[ -n $image_type ]] || continue
+  size="$(stat -c '%s' -- "$source" 2>/dev/null || printf '0')"
+  ((size > 0 && size <= MAX_WALLPAPER_BYTES)) || continue
+
+  hash="$(sha256sum < "$source" | cut -c 1-10)"
+  image_name="wallpaper-${hash}.${image_type}"
+
+  if [[ -z ${generated_files[$image_name]+x} ]]; then
+    ((total_bytes + size <= MAX_TOTAL_WALLPAPER_BYTES)) || continue
+    tmp_image="$(mktemp "$EXTENSION_DIR/.wallpaper.XXXXXX")"
+    cp -- "$source" "$tmp_image"
     chmod 0644 -- "$tmp_image"
     mv -f -- "$tmp_image" "$EXTENSION_DIR/$image_name"
-    wallpaper="url(\"$image_name\")"
+    tmp_image=""
+    generated_files[$image_name]=1
+    total_bytes=$((total_bytes + size))
+
+    source_name="$(basename -- "$source")"
+    display_name="${source_name%.*}"
+    display_name="$(printf '%s' "$display_name" | tr -d '\000-\037\177')"
+    display_name="${display_name:0:80}"
+    [[ -n $display_name ]] || display_name="$image_name"
+    name_json="$(json_escape "$display_name")"
+
+    if ((manifest_has_entry)); then
+      printf ',' >>"$tmp_manifest"
+    fi
+    printf '\n  {"name":"%s","file":"%s"}' "$name_json" "$image_name" >>"$tmp_manifest"
+    manifest_has_entry=1
   fi
-fi
+
+  if [[ $source == "$background_source" ]]; then
+    system_wallpaper="url(\"$image_name\")"
+  fi
+done
+
+printf '\n]\n' >>"$tmp_manifest"
 
 tmp_css="$(mktemp "$EXTENSION_DIR/.colors.css.XXXXXX")"
 
@@ -141,19 +207,21 @@ cat >"$tmp_css" <<EOF
   --fg-muted: $fg_muted;
   --accent: $accent;
   --selection: $selection;
-  --wallpaper: $wallpaper;
+  --wallpaper: $system_wallpaper;
 }
 EOF
 
 tmp_name="$(mktemp "$EXTENSION_DIR/.theme-name.XXXXXX")"
 printf '%s\n' "$theme_name" >"$tmp_name"
-chmod 0644 -- "$tmp_css" "$tmp_name"
+chmod 0644 -- "$tmp_css" "$tmp_name" "$tmp_manifest"
 mv -f -- "$tmp_css" "$EXTENSION_DIR/colors.css"
 mv -f -- "$tmp_name" "$EXTENSION_DIR/theme-name.txt"
+mv -f -- "$tmp_manifest" "$EXTENSION_DIR/wallpapers.json"
 
-for old in "$EXTENSION_DIR"/background-*; do
+for old in "$EXTENSION_DIR"/background-* "$EXTENSION_DIR"/wallpaper-*; do
   [[ -e $old ]] || continue
-  [[ -n $image_name && $(basename -- "$old") == "$image_name" ]] && continue
+  old_name="$(basename -- "$old")"
+  [[ -n ${generated_files[$old_name]+x} ]] && continue
   rm -f -- "$old"
 done
 

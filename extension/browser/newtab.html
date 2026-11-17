@@ -36,6 +36,8 @@
           <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Search the web or type a URL" aria-label="Search" autofocus />
           <kbd>/</kbd>
         </form>
+
+        <nav class="links" id="links" aria-label="Quick links" hidden></nav>
       </section>
 
       <footer class="foot">
@@ -55,33 +57,67 @@
           </button>
         </header>
 
-        <section class="settings-section" aria-labelledby="settings-display">
-          <h3 id="settings-display">Display</h3>
-          <label class="setting"><span>Clock</span><input type="checkbox" data-setting="showClock" /></label>
-          <label class="setting"><span>Date</span><input type="checkbox" data-setting="showDate" /></label>
-          <label class="setting"><span>Greeting</span><input type="checkbox" data-setting="showGreeting" /></label>
-          <label class="setting"><span>Theme name</span><input type="checkbox" data-setting="showTheme" /></label>
-          <label class="setting"><span>24-hour clock</span><input type="checkbox" data-setting="clock24" /></label>
-          <label class="setting"><span>Seconds</span><input type="checkbox" data-setting="showSeconds" /></label>
-        </section>
+        <div class="settings-tabs" role="tablist" aria-label="Settings sections">
+          <button class="settings-tab" id="settings-tab-display" type="button" role="tab" aria-selected="true" aria-controls="settings-panel-display" tabindex="0">Display</button>
+          <button class="settings-tab" id="settings-tab-links" type="button" role="tab" aria-selected="false" aria-controls="settings-panel-links" tabindex="-1">Links</button>
+          <button class="settings-tab" id="settings-tab-background" type="button" role="tab" aria-selected="false" aria-controls="settings-panel-background" tabindex="-1">Background</button>
+        </div>
 
-        <section class="settings-section" aria-labelledby="settings-layout">
-          <h3 id="settings-layout">Layout</h3>
-          <label class="setting"><span>Compact layout</span><input type="checkbox" data-setting="compact" /></label>
-          <label class="setting"><span>Reduce motion</span><input type="checkbox" data-setting="reduceMotion" /></label>
-        </section>
+        <div class="settings-body" id="settings-body">
+          <section class="settings-panel" id="settings-panel-display" role="tabpanel" aria-labelledby="settings-tab-display">
+            <section class="settings-section" aria-labelledby="settings-display">
+              <h3 id="settings-display">Display</h3>
+              <label class="setting"><span>Clock</span><input type="checkbox" data-setting="showClock" /></label>
+              <label class="setting"><span>Date</span><input type="checkbox" data-setting="showDate" /></label>
+              <label class="setting"><span>Greeting</span><input type="checkbox" data-setting="showGreeting" /></label>
+              <label class="setting"><span>Theme name</span><input type="checkbox" data-setting="showTheme" /></label>
+              <label class="setting"><span>24-hour clock</span><input type="checkbox" data-setting="clock24" /></label>
+              <label class="setting"><span>Seconds</span><input type="checkbox" data-setting="showSeconds" /></label>
+            </section>
 
-        <section class="settings-section" aria-labelledby="settings-wallpaper">
-          <h3 id="settings-wallpaper">Wallpaper</h3>
-          <label class="setting range">
-            <span class="range-head"><span>Dim</span><output data-output="wallpaperDim"></output></span>
-            <input type="range" data-setting="wallpaperDim" min="0" max="100" step="5" />
-          </label>
-          <label class="setting range">
-            <span class="range-head"><span>Blur</span><output data-output="wallpaperBlur"></output></span>
-            <input type="range" data-setting="wallpaperBlur" min="0" max="20" step="1" />
-          </label>
-        </section>
+            <section class="settings-section" aria-labelledby="settings-layout">
+              <h3 id="settings-layout">Layout</h3>
+              <label class="setting"><span>Compact layout</span><input type="checkbox" data-setting="compact" /></label>
+              <label class="setting"><span>Reduce motion</span><input type="checkbox" data-setting="reduceMotion" /></label>
+            </section>
+          </section>
+
+          <section class="settings-panel" id="settings-panel-links" role="tabpanel" aria-labelledby="settings-tab-links" hidden>
+            <section class="settings-section" aria-labelledby="settings-links">
+              <h3 id="settings-links">Quick links</h3>
+              <label class="setting"><span>Show quick links</span><input type="checkbox" data-setting="showLinks" /></label>
+              <p class="settings-hint">Show your saved links below the search field.</p>
+              <form class="link-form" id="link-form">
+                <input id="link-name" type="text" maxlength="40" placeholder="Name (optional)" aria-label="Link name" autocomplete="off" spellcheck="false" />
+                <input id="link-url" type="text" maxlength="2048" placeholder="https://example.com" aria-label="Link URL" inputmode="url" autocomplete="off" spellcheck="false" />
+                <button class="button" id="link-add" type="submit">Add</button>
+              </form>
+              <p class="settings-status" id="link-status" role="status" aria-live="polite"></p>
+              <ul class="link-list" id="link-list" aria-label="Custom links"></ul>
+              <p class="settings-empty" id="link-empty">No custom links yet.</p>
+            </section>
+          </section>
+
+          <section class="settings-panel" id="settings-panel-background" role="tabpanel" aria-labelledby="settings-tab-background" hidden>
+            <section class="settings-section" aria-labelledby="settings-background">
+              <h3 id="settings-background">Background</h3>
+              <div class="background-grid" id="background-grid" role="group" aria-label="Background image"></div>
+              <p class="settings-status" id="background-status" role="status" aria-live="polite"></p>
+              <div class="background-actions">
+                <button class="button ghost" id="background-add" type="button">Add custom image</button>
+                <input id="background-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif" hidden />
+              </div>
+              <label class="setting range">
+                <span class="range-head"><span>Dim</span><output data-output="wallpaperDim"></output></span>
+                <input type="range" data-setting="wallpaperDim" min="0" max="100" step="5" />
+              </label>
+              <label class="setting range">
+                <span class="range-head"><span>Blur</span><output data-output="wallpaperBlur"></output></span>
+                <input type="range" data-setting="wallpaperBlur" min="0" max="20" step="1" />
+              </label>
+            </section>
+          </section>
+        </div>
 
         <p class="settings-note">Preferences are saved in this browser.</p>
 

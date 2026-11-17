@@ -2,3 +2,5 @@ extension/browser/colors.css
 extension/browser/theme-name.txt
 extension/browser/.theme-fingerprint
 extension/browser/background-*
+extension/browser/wallpapers.json
+extension/browser/wallpaper-*
