@@ -121,9 +121,7 @@ Use the button in the top-right corner to open the **Display**, **Links**, and
 Background provides the wallpaper picker, dim, and blur controls.
 Changes apply immediately and can be restored with **Reset to defaults**.
 
-![Display settings](settings-display.png)
-![Links settings](settings-links.png)
-![Background settings](settings-background.png)
+![Settings](settings.png)
 
 ### Quick links
 
