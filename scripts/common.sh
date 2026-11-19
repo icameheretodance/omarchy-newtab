@@ -174,6 +174,50 @@ extension_in_flags() {
   return 1
 }
 
+write_flags_file() {
+  local flags_file="$1"
+  shift
+  local dir tmp backup
+
+  dir="$(dirname -- "$flags_file")" || return 1
+  mkdir -p -- "$dir" || return 1
+  tmp="$(mktemp "$dir/.${flags_file##*/}.XXXXXX")" || return 1
+
+  if [[ -f $flags_file ]]; then
+    cp -p -- "$flags_file" "$tmp" || {
+      rm -f -- "$tmp"
+      return 1
+    }
+    backup="$flags_file.bak.$(date +%s)"
+    cp -p -- "$flags_file" "$backup" || {
+      rm -f -- "$tmp"
+      return 1
+    }
+  else
+    chmod 0644 -- "$tmp" || {
+      rm -f -- "$tmp"
+      return 1
+    }
+  fi
+
+  if (($#)); then
+    if ! printf '%s\n' "$@" >"$tmp"; then
+      rm -f -- "$tmp"
+      return 1
+    fi
+  else
+    if ! : >"$tmp"; then
+      rm -f -- "$tmp"
+      return 1
+    fi
+  fi
+
+  if ! mv -f -- "$tmp" "$flags_file"; then
+    rm -f -- "$tmp"
+    return 1
+  fi
+}
+
 add_extension_to_flags() {
   local flags_file="$1"
   local extension="$2"
@@ -183,10 +227,10 @@ add_extension_to_flags() {
   local -A seen=()
 
   if [[ ! -e $flags_file ]]; then
-    mkdir -p -- "$(dirname -- "$flags_file")"
-    printf '%s\n' "--load-extension=$extension" >"$flags_file"
-    return 0
+    write_flags_file "$flags_file" "--load-extension=$extension"
+    return $?
   fi
+  [[ -r $flags_file ]] || return 1
 
   while IFS= read -r line || [[ -n $line ]]; do
     trimmed="$(trim "$line")"
@@ -216,9 +260,7 @@ add_extension_to_flags() {
 
   output+=("--load-extension=$(join_extension_list "${values[@]}")")
 
-  cp -p -- "$flags_file" "$flags_file.bak.$(date +%s)"
-  printf '%s\n' "${output[@]}" >"$flags_file"
-  return 0
+  write_flags_file "$flags_file" "${output[@]}"
 }
 
 remove_extension_from_flags() {
@@ -229,7 +271,7 @@ remove_extension_from_flags() {
   local filtered=()
   local has_ours found=0
 
-  [[ -f $flags_file ]] || return 1
+  [[ -f $flags_file && -r $flags_file ]] || return 1
 
   while IFS= read -r line || [[ -n $line ]]; do
     trimmed="$(trim "$line")"
@@ -264,11 +306,5 @@ remove_extension_from_flags() {
 
   ((found)) || return 1
 
-  cp -p -- "$flags_file" "$flags_file.bak.$(date +%s)"
-  if ((${#output[@]})); then
-    printf '%s\n' "${output[@]}" >"$flags_file"
-  else
-    : >"$flags_file"
-  fi
-  return 0
+  write_flags_file "$flags_file" "${output[@]}"
 }
